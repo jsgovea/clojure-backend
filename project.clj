@@ -7,6 +7,8 @@
                  [ring "1.10.0"]
                  [compojure "1.7.0"]]
   :repl-options {:init-ns webdev.core}
+  :uberjar-name "webdev.jar" 
+  
   :main webdev.core
   :profiles {:dev
              {:main webdev.core/-dev-main}})
