@@ -1,10 +1,14 @@
 (ns webdev.core
   (:require [webdev.item.model :as items]
-            [webdev.item.handler :refer [handle-index-items handle-created-item]]) 
-                                         
+            [webdev.item.handler :refer [handle-index-items handle-created-item]])
+
   (:require [ring.adapter.jetty :as jetty]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.params :refer [wrap-params]]
+            [ring.middleware.resource :refer [wrap-resource]]
+            [ring.middleware.content-type :refer [wrap-content-type]]
+            [ring.middleware.file :refer [wrap-file]]
+            [ring.middleware.file-info :refer [wrap-file-info]]
             [compojure.core :refer [defroutes ANY GET POST PUT DELETE]]
             [compojure.route :refer [not-found]]
             [ring.handler.dump :refer [handle-dump]]))
@@ -67,15 +71,18 @@
   (fn [req]
     (hdlr (assoc req :webdev/db db))))
 
-(defn wraper-server [hdlr]
+(defn wrap-server [hdlr]
   (fn [req]
     (assoc-in (hdlr req) [:headers "Server"] "Listronica 9000")))
 
 (def app
-  (wraper-server
-   (wrap-db
-    (wrap-params
-     routes))))
+  (wrap-server
+   (wrap-file-info
+    (wrap-resource
+     (wrap-db
+      (wrap-params
+       routes))
+     "static"))))
 
 (defn -main [port]
   (items/create-table db)
